@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
+import { DOCS_LINK } from '@/components/Layout'
 import { useAsync } from '@/lib/hooks'
 import { count } from '@/lib/format'
 import { Caveat, Page, SectionHead, StatTile } from '@/components/ui'
@@ -143,8 +144,13 @@ export default function About() {
         <Link to="/search" className="btn-primary">
           Start with a role
         </Link>
-        <a href="/api/docs" target="_blank" rel="noreferrer" className="btn-secondary">
-          Read the API docs
+        <a
+          href={DOCS_LINK.href}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="btn-secondary"
+        >
+          {DOCS_LINK.label === 'API docs' ? 'Read the API docs' : DOCS_LINK.label}
         </a>
       </div>
     </Page>

@@ -1,0 +1,101 @@
+name: Deploy demo to GitHub Pages
+
+# Builds the corpus with the real pipeline, freezes every read-only API
+# response to JSON, then publishes a static build of the frontend that reads
+# those files. Pages cannot run FastAPI, so the alternative to this is a site
+# that loads and then fails on every request.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# ONE-TIME SETUP: Settings → Pages → Build and deployment → Source
+#                 must be set to "GitHub Actions".
+# While it is still on "Deploy from a branch", Pages serves the repository root
+# through Jekyll, which renders README.md as the home page — and this workflow
+# will fail at the deploy step.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; queue instead of cancelling so a finished build
+# is not thrown away.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Work out the base path
+        id: base
+        # A project page is served from /<repo>/, a user or org page from /.
+        run: |
+          repo="${{ github.event.repository.name }}"
+          if [[ "$repo" == *.github.io ]]; then
+            echo "path=/" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=/$repo/" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build the corpus
+        working-directory: backend
+        # Deterministic: SEED_RANDOM_STATE fixes the generated postings, so the
+        # published figures are reproducible rather than shifting per deploy.
+        run: python manage.py seed
+
+      - name: Freeze the analysis to static JSON
+        working-directory: backend
+        run: python export_static.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build the site
+        working-directory: frontend
+        env:
+          VITE_STATIC_DATA: 'true'
+          VITE_BASE_PATH: ${{ steps.base.outputs.path }}
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

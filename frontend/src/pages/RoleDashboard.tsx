@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { api } from '@/lib/api'
+import { api, isStaticBuild } from '@/lib/api'
 import { useAsync } from '@/lib/hooks'
 import { count, dateLabel } from '@/lib/format'
 import { DistributionBars, Sparkline, DirectionChip } from '@/components/charts'
@@ -45,15 +45,21 @@ export default function RoleDashboard() {
       <Page>
         <EmptyState
           title={`We have not analysed “${role}” yet`}
-          body="We currently cover 13 roles. Browse the full list, or paste a job description and we will analyse that single posting instead."
+          body={
+            isStaticBuild
+              ? 'This demo covers the roles listed below. Browse them to see the full requirement breakdown for each.'
+              : 'We currently cover 13 roles. Browse the full list, or paste a job description and we will analyse that single posting instead.'
+          }
           action={
             <div className="flex flex-wrap justify-center gap-2">
               <Link to="/search" className="btn-primary">
                 Browse roles
               </Link>
-              <Link to="/analyze" className="btn-secondary">
-                Analyse a job description
-              </Link>
+              {!isStaticBuild && (
+                <Link to="/analyze" className="btn-secondary">
+                  Analyse a job description
+                </Link>
+              )}
             </div>
           }
         />

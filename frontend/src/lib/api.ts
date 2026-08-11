@@ -13,19 +13,22 @@ import type {
   SkillGap,
   Source,
 } from './types'
+import { ApiError, UnsupportedInStaticBuild } from './apiError'
 import { getProfileToken } from './profile'
+import { staticApi } from './staticApi'
+
+export { ApiError, UnsupportedInStaticBuild }
+
+/**
+ * Whether this bundle was built to run without a backend.
+ *
+ * Set by `VITE_STATIC_DATA=true` at build time (see the Pages workflow). Pages
+ * check it to explain, rather than silently hide, the features that need the
+ * Python service.
+ */
+export const isStaticBuild = import.meta.env.VITE_STATIC_DATA === 'true'
 
 const BASE = import.meta.env.VITE_API_BASE ?? ''
-
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-  ) {
-    super(message)
-    this.name = 'ApiError'
-  }
-}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response
@@ -74,7 +77,7 @@ function withToken(init: RequestInit = {}): RequestInit {
   }
 }
 
-export const api = {
+const liveApi = {
   health: () => request<Health>('/api/health'),
   sources: () => request<Source[]>('/api/sources'),
 
@@ -125,3 +128,9 @@ export const api = {
   skillGap: (slug: string) =>
     request<SkillGap>(`/api/profile/skill-gap/${encodeURIComponent(slug)}`, withToken()),
 }
+
+/**
+ * The two clients are interchangeable by design: pages call `api.role(slug)`
+ * without knowing whether that hits FastAPI or a frozen JSON document.
+ */
+export const api = isStaticBuild ? (staticApi as typeof liveApi) : liveApi

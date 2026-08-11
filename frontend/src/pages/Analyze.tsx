@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api, ApiError } from '@/lib/api'
+import { api, ApiError, isStaticBuild } from '@/lib/api'
 import type { AnalyzeResult } from '@/lib/types'
 import { experienceLabel } from '@/lib/format'
-import { Caveat, Page, SectionHead, StatTile, cx } from '@/components/ui'
+import { Caveat, EmptyState, Page, SectionHead, StatTile, cx } from '@/components/ui'
 
 const SAMPLE = `Senior Data Analyst — Bengaluru
 
@@ -66,18 +66,58 @@ export default function Analyze() {
   const required = result?.skills.filter((s) => s.requirement_type === 'required') ?? []
   const preferred = result?.skills.filter((s) => s.requirement_type === 'preferred') ?? []
 
+  const header = (
+    <div>
+      <p className="label">Analyse a single posting</p>
+      <h1 className="mt-1.5 text-3xl font-semibold tracking-tight">
+        Paste a job description
+      </h1>
+      <p className="mt-2 max-w-2xl text-sm text-muted">
+        Runs the same extraction pipeline used across the whole corpus. Useful for a role we
+        do not cover, or to see exactly what one posting is asking for.
+      </p>
+    </div>
+  )
+
+  // Extraction is a Python service. A static deployment has nowhere to run it,
+  // so say that plainly instead of offering a button that always fails.
+  if (isStaticBuild) {
+    return (
+      <Page>
+        {header}
+        <div className="mt-8">
+          <EmptyState
+            title="Not available in this demo"
+            body={
+              'This page runs the taxonomy matcher and section parser, which live in ' +
+              'the Python backend. The published demo is a static build with no server ' +
+              'behind it, so there is nothing here to run them. Everything else on the ' +
+              'site works — those pages read analysis that was computed ahead of time.'
+            }
+            action={
+              <div className="flex flex-wrap justify-center gap-2">
+                <Link to="/search" className="btn-primary">
+                  Browse the analysed roles
+                </Link>
+                <a
+                  href="https://github.com/gokul-k101/hello-world#quick-start"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="btn-secondary"
+                >
+                  Run it locally ↗
+                </a>
+              </div>
+            }
+          />
+        </div>
+      </Page>
+    )
+  }
+
   return (
     <Page>
-      <div>
-        <p className="label">Analyse a single posting</p>
-        <h1 className="mt-1.5 text-3xl font-semibold tracking-tight">
-          Paste a job description
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted">
-          Runs the same extraction pipeline used across the whole corpus. Useful for a role we
-          do not cover, or to see exactly what one posting is asking for.
-        </p>
-      </div>
+      {header}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_1fr]">
         <section>

@@ -13,6 +13,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "frontend", "run", "dev", "--", "--port", "5190", "--strictPort"],
       "port": 5190
+    },
+    {
+      "name": "helloworld-static",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd frontend && set VITE_BASE_PATH=/hello-world/&& npx vite preview --port 5191 --strictPort"],
+      "port": 5191,
+      "url": "http://localhost:5191"
     }
   ]
 }

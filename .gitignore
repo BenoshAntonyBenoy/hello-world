@@ -19,6 +19,10 @@ dist/
 .vite/
 *.tsbuildinfo
 
+# Static API export — regenerated from the database on every build, so it is
+# never committed. See backend/export_static.py.
+frontend/public/api/
+
 # Editors / OS
 .vscode/
 .idea/

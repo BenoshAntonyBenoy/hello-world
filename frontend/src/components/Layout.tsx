@@ -1,7 +1,14 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useTheme } from '@/lib/hooks'
+import { isStaticBuild } from '@/lib/api'
 import { cx } from './ui'
+
+// There is no API server behind a static build, so point at the source instead
+// of a /api/docs URL that would 404.
+export const DOCS_LINK = isStaticBuild
+  ? { href: 'https://github.com/gokul-k101/hello-world', label: 'Source on GitHub' }
+  : { href: '/api/docs', label: 'API docs' }
 
 const NAV = [
   { to: '/search', label: 'Roles' },
@@ -129,8 +136,13 @@ export function Layout({ children }: { children: ReactNode }) {
             <Link to="/profile" className="hover:text-ink">
               Your data
             </Link>
-            <a href="/api/docs" className="hover:text-ink" target="_blank" rel="noreferrer">
-              API docs
+            <a
+              href={DOCS_LINK.href}
+              className="hover:text-ink"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              {DOCS_LINK.label}
             </a>
           </div>
         </div>

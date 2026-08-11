@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { api } from '@/lib/api'
+import { api, isStaticBuild } from '@/lib/api'
 import { useAsync } from '@/lib/hooks'
 import { count } from '@/lib/format'
 import { SearchBar } from '@/components/SearchBar'
@@ -61,15 +61,21 @@ export default function Search() {
         <div className="mt-10">
           <EmptyState
             title={`No role matches “${query}”`}
-            body="We analyse 13 roles today. If yours is not here, paste a job description and we will analyse that posting on its own."
+            body={
+              isStaticBuild
+                ? 'This demo analyses 13 roles. Clear the search to see all of them.'
+                : 'We analyse 13 roles today. If yours is not here, paste a job description and we will analyse that posting on its own.'
+            }
             action={
               <div className="flex flex-wrap justify-center gap-2">
                 <Link to="/search" className="btn-secondary">
                   Clear search
                 </Link>
-                <Link to="/analyze" className="btn-primary">
-                  Analyse a job description
-                </Link>
+                {!isStaticBuild && (
+                  <Link to="/analyze" className="btn-primary">
+                    Analyse a job description
+                  </Link>
+                )}
               </div>
             }
           />
