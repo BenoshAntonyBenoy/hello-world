@@ -1,0 +1,12 @@
+# Pinned to versions that publish prebuilt wheels for Python 3.11–3.14.
+# pydantic-core is a Rust extension: an older pin forces a source build and
+# fails on any machine without a C/Rust toolchain.
+fastapi>=0.120.0
+uvicorn[standard]>=0.38.0
+SQLAlchemy>=2.0.44
+pydantic>=2.12.0
+pydantic-settings>=2.13.0
+python-dotenv>=1.1.1
+
+# Optional: only needed when DATABASE_URL points at PostgreSQL.
+# psycopg[binary]>=3.2.10

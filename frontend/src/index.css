@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --canvas: 250 250 251;
+    --surface: 255 255 255;
+    --raised: 246 247 249;
+    --line: 226 228 233;
+    --ink: 17 19 24;
+    --muted: 92 98 110;
+    --faint: 140 146 158;
+
+    --brand: 79 70 229;
+    --brand-soft: 238 238 253;
+    --brand-ink: 67 56 202;
+
+    --high: 220 38 38;
+    --medium: 202 138 4;
+    --low: 22 143 91;
+  }
+
+  .dark {
+    --canvas: 9 10 13;
+    --surface: 17 19 24;
+    --raised: 24 27 33;
+    --line: 39 43 51;
+    --ink: 240 241 244;
+    --muted: 154 160 172;
+    --faint: 112 118 130;
+
+    --brand: 129 122 250;
+    --brand-soft: 32 31 63;
+    --brand-ink: 165 160 252;
+
+    --high: 248 113 113;
+    --medium: 234 179 8;
+    --low: 52 191 128;
+  }
+
+  * {
+    border-color: rgb(var(--line));
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* Percentages and counts sit in columns all over this app — without tabular
+     figures the digits jitter as values change. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand/60 ring-offset-2 ring-offset-canvas;
+  }
+
+  ::selection {
+    background: rgb(var(--brand) / 0.22);
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-line bg-surface shadow-card;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
+           text-sm font-medium transition-colors duration-150
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand text-white hover:bg-brand-ink;
+  }
+
+  .btn-secondary {
+    @apply btn border border-line bg-surface text-ink hover:bg-raised;
+  }
+
+  .btn-ghost {
+    @apply btn text-muted hover:bg-raised hover:text-ink;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm
+           text-ink placeholder:text-faint
+           focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/25;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line
+           bg-raised px-2.5 py-1 text-2xs font-medium text-muted;
+  }
+
+  .label {
+    @apply text-2xs font-semibold uppercase tracking-wider text-faint;
+  }
+
+  .link {
+    @apply text-brand underline-offset-4 hover:underline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
