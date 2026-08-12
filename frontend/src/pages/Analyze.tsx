@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { api, ApiError, isStaticBuild } from '@/lib/api'
+import { analyzerAvailable, api, ApiError } from '@/lib/api'
 import type { AnalyzeResult } from '@/lib/types'
 import { usePageMeta } from '@/lib/hooks'
 import { experienceLabel } from '@/lib/format'
@@ -86,7 +86,7 @@ export default function Analyze() {
 
   // Extraction is a Python service. A static deployment has nowhere to run it,
   // so say that plainly instead of offering a button that always fails.
-  if (isStaticBuild) {
+  if (!analyzerAvailable) {
     return (
       <Page>
         {header}
@@ -105,7 +105,7 @@ export default function Analyze() {
                   Browse the analysed roles
                 </Link>
                 <a
-                  href="https://github.com/gokul-k101/hello-world#quick-start"
+                  href="https://github.com/BenoshAntonyBenoy/hello-world#quick-start"
                   target="_blank"
                   rel="noreferrer noopener"
                   className="btn-secondary"

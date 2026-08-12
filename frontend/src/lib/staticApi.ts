@@ -39,7 +39,9 @@ const BASE = import.meta.env.BASE_URL || '/'
 async function doc<T>(path: string): Promise<T> {
   let res: Response
   try {
-    res = await fetch(`${BASE}api/${path}`)
+    // "data", not "api" — /api/* is reserved for the serverless analyser.
+    // Written by backend/export_static.py; the two must stay in step.
+    res = await fetch(`${BASE}data/${path}`)
   } catch {
     throw new ApiError('Could not load the demo data files.', 0)
   }

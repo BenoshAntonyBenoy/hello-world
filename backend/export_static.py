@@ -39,7 +39,10 @@ from app.connectors import bootstrap
 from app.database import SessionLocal
 from app.models import Role
 
-OUT_DIR = BACKEND_DIR.parent / "frontend" / "public" / "api"
+# "data" rather than "api": on Vercel every /api/* path is reserved for
+# serverless functions, so frozen JSON served from there would be shadowed by
+# the analyser function. Keep this in step with staticApi.ts.
+OUT_DIR = BACKEND_DIR.parent / "frontend" / "public" / "data"
 
 # Deliberately larger than the interactive defaults: the static build paginates
 # and filters client-side, so it wants the full set in one document.

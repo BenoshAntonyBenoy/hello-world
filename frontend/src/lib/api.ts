@@ -28,6 +28,18 @@ export { ApiError, UnsupportedInStaticBuild }
  */
 export const isStaticBuild = import.meta.env.VITE_STATIC_DATA === 'true'
 
+/**
+ * Whether the job-ad analyser can actually run.
+ *
+ * A static build has no Python behind it, so the analyser is normally
+ * unavailable. The Vercel deployment is the exception: the dashboards still
+ * read frozen JSON, but one serverless function serves `/api/analyze-job`.
+ * Pages should gate on this rather than on `isStaticBuild`, which would hide a
+ * feature that is in fact working.
+ */
+export const analyzerAvailable =
+  !isStaticBuild || import.meta.env.VITE_ANALYZER === 'true'
+
 const BASE = import.meta.env.VITE_API_BASE ?? ''
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -133,4 +145,11 @@ const liveApi = {
  * The two clients are interchangeable by design: pages call `api.role(slug)`
  * without knowing whether that hits FastAPI or a frozen JSON document.
  */
-export const api = isStaticBuild ? (staticApi as typeof liveApi) : liveApi
+export const api = isStaticBuild
+  ? ({
+      ...staticApi,
+      // Everything else in a static build reads frozen JSON; only this one
+      // endpoint goes over the wire, and only where a function is deployed.
+      analyzeJob: analyzerAvailable ? liveApi.analyzeJob : staticApi.analyzeJob,
+    } as typeof liveApi)
+  : liveApi

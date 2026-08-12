@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api, isStaticBuild } from '@/lib/api'
+import { analyzerAvailable, api } from '@/lib/api'
 import { useDebounced } from '@/lib/hooks'
 import type { RoleSummary } from '@/lib/types'
 import { count } from '@/lib/format'
@@ -203,7 +203,7 @@ export function SearchBar({
             </li>
           ))}
 
-          {!isStaticBuild && (
+          {analyzerAvailable && (
             <li className="mt-1 border-t border-line pt-1">
               <button
                 type="button"

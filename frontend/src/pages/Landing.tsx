@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { SearchBar } from '@/components/SearchBar'
 import { Page, Skeleton, cx } from '@/components/ui'
-import { api, isStaticBuild } from '@/lib/api'
+import { analyzerAvailable, api } from '@/lib/api'
 import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count } from '@/lib/format'
 
@@ -198,7 +198,7 @@ export default function Landing() {
       {/* Job ad + honesty ------------------------------------------------ */}
       <Page className="pt-0">
         <div className="grid gap-4 lg:grid-cols-2">
-          {!isStaticBuild && (
+          {analyzerAvailable && (
             <div className="card flex flex-col justify-between gap-4 p-6">
               <div>
                 <h2 className="text-lg font-semibold tracking-tight">

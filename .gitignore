@@ -21,10 +21,11 @@ dist/
 
 # Static API export — regenerated from the database on every build, so it is
 # never committed. See backend/export_static.py.
-frontend/public/api/
+frontend/public/data/
 
 # Editors / OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+.vercel

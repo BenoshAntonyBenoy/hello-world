@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { api, isStaticBuild } from '@/lib/api'
+import { analyzerAvailable, api } from '@/lib/api'
 import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count, dateLabel } from '@/lib/format'
 import { DistributionBars, Sparkline, DirectionChip } from '@/components/charts'
@@ -54,18 +54,18 @@ export default function RoleDashboard() {
         <EmptyState
           title={`We have not analysed “${role}” yet`}
           body={
-            isStaticBuild
-              ? 'This demo covers the roles listed below. Browse them to see the full requirement breakdown for each.'
-              : 'We currently cover 13 roles. Browse the full list, or paste a job description and we will analyse that single posting instead.'
+            analyzerAvailable
+              ? 'Browse the jobs we cover, or paste the job ad itself and we will analyse that single posting instead.'
+              : 'This demo covers the jobs listed below. Browse them to see the full requirement breakdown for each.'
           }
           action={
             <div className="flex flex-wrap justify-center gap-2">
               <Link to="/search" className="btn-primary">
                 Browse roles
               </Link>
-              {!isStaticBuild && (
+              {analyzerAvailable && (
                 <Link to="/analyze" className="btn-secondary">
-                  Analyse a job description
+                  Paste a job ad
                 </Link>
               )}
             </div>

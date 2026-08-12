@@ -1,0 +1,11 @@
+# Dependencies for the Vercel serverless function in api/.
+#
+# Vercel installs from this file at the project root. It is deliberately a
+# subset of backend/requirements.txt: the function only serves the job-ad
+# analyser, so it needs FastAPI, SQLAlchemy and Pydantic but not uvicorn —
+# Vercel supplies the ASGI server itself.
+fastapi>=0.120.0
+SQLAlchemy>=2.0.44
+pydantic>=2.12.0
+pydantic-settings>=2.13.0
+python-dotenv>=1.1.1
