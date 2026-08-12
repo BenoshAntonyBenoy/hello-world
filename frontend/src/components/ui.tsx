@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { Confidence, Priority, SkillStat } from '@/lib/types'
+import { COURSES } from '@/content/courses'
 import { count, pct } from '@/lib/format'
 
 export function cx(...parts: (string | false | null | undefined)[]): string {
@@ -198,12 +199,83 @@ export function StatTile({
  * required versus merely preferred. Flattening those into a single number
  * would hide the difference between "you need this" and "nice if you have it".
  */
+/** Free courses for one requirement, opened in a new tab. */
+function CourseMenu({ slug, skillName }: { slug: string; skillName: string }) {
+  const courses = COURSES[slug]
+  const [open, setOpen] = useState(false)
+  const wrap = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDown(event: MouseEvent) {
+      if (!wrap.current?.contains(event.target as Node)) setOpen(false)
+    }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  // No button at all rather than one that opens an empty list.
+  if (!courses?.length) return null
+
+  return (
+    <div ref={wrap} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        className="btn-secondary whitespace-nowrap px-3 py-1.5 text-xs"
+      >
+        View courses
+        <svg
+          viewBox="0 0 24 24"
+          className={cx('h-3.5 w-3.5 transition-transform', open && 'rotate-180')}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full z-30 mt-1.5 w-[19rem] rounded-xl border border-line bg-surface p-1.5 shadow-lift">
+          <p className="label px-2.5 pb-1 pt-1.5">Free courses · {skillName}</p>
+          {courses.map((course) => (
+            <a
+              key={course.url + course.title}
+              href={course.url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="block rounded-lg px-2.5 py-2 transition-colors hover:bg-raised"
+            >
+              <span className="block text-sm leading-snug">{course.title}</span>
+              <span className="block text-xs text-faint">{course.provider} ↗</span>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function SkillBar({ stat, index = 0 }: { stat: SkillStat; index?: number }) {
   const required = Math.min(stat.required_pct, stat.frequency_pct)
   const preferred = Math.max(0, stat.frequency_pct - required)
 
+  // The meter is capped at 15rem rather than filling the row, so the percentage
+  // sits next to the name it describes instead of a screen-width away from it.
+  // The space that frees up carries the courses button.
   return (
-    <div className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 py-2 sm:grid-cols-[13rem_minmax(0,1fr)_3.25rem]">
+    <div className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-2.5 sm:grid-cols-[13rem_minmax(0,15rem)_3rem_minmax(0,1fr)]">
       <div className="min-w-0 sm:pr-2">
         <p className="truncate text-sm font-medium" title={stat.skill.canonical}>
           {stat.skill.canonical}
@@ -213,7 +285,7 @@ export function SkillBar({ stat, index = 0 }: { stat: SkillStat; index?: number 
         </p>
       </div>
 
-      <div className="col-span-2 sm:col-span-1 sm:order-none order-last">
+      <div className="order-1 col-span-2 sm:order-none sm:col-span-1">
         <div
           className="flex h-2 w-full overflow-hidden rounded-full bg-raised"
           role="img"
@@ -231,6 +303,10 @@ export function SkillBar({ stat, index = 0 }: { stat: SkillStat; index?: number 
       </div>
 
       <p className="tnum text-right text-sm font-semibold">{pct(stat.frequency_pct)}</p>
+
+      <div className="order-2 col-span-2 flex justify-start sm:order-none sm:col-span-1 sm:justify-end">
+        <CourseMenu slug={stat.skill.slug} skillName={stat.skill.canonical} />
+      </div>
     </div>
   )
 }
@@ -272,12 +348,23 @@ export function SampleDataBadge() {
 
 /* --------------------------------------------------------------------- nav */
 
+/**
+ * Everything a person can do with a role, in the words they would use.
+ *
+ * Trends and the skill gap used to sit in the global header even though both
+ * are scoped to a single role — you cannot ask "am I ready?" without saying
+ * ready for what. Moving them here means the question only ever appears once
+ * the role is already chosen, and the header stops asking people to pick
+ * between five nouns before they know what any of them contain.
+ */
 export function RoleTabs({ slug, active }: { slug: string; active: string }) {
   const tabs = [
     { key: 'overview', label: 'Overview', to: `/jobs/${slug}` },
-    { key: 'skills', label: 'Skills', to: `/jobs/${slug}/skills` },
-    { key: 'roadmap', label: 'Roadmap', to: `/jobs/${slug}/roadmap` },
-    { key: 'jobs', label: 'Jobs', to: `/jobs/${slug}/listings` },
+    { key: 'roadmap', label: 'What to learn', to: `/jobs/${slug}/roadmap` },
+    { key: 'gap', label: 'Am I ready?', to: `/skill-gap?role=${slug}` },
+    { key: 'trends', label: "What's changing", to: `/trends?role=${slug}` },
+    { key: 'skills', label: 'Every requirement', to: `/jobs/${slug}/skills` },
+    { key: 'jobs', label: 'Real postings', to: `/jobs/${slug}/listings` },
   ]
   return (
     <nav className="-mb-px flex gap-1 overflow-x-auto border-b border-line" aria-label="Role sections">

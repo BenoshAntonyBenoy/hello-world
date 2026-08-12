@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '@/lib/api'
+import { api, isStaticBuild } from '@/lib/api'
 import { useDebounced } from '@/lib/hooks'
 import type { RoleSummary } from '@/lib/types'
 import { count } from '@/lib/format'
@@ -8,6 +8,8 @@ import { cx } from './ui'
 
 interface Props {
   size?: 'lg' | 'md'
+  /** Header variant: input only, no separate submit button. */
+  compact?: boolean
   placeholder?: string
   autoFocus?: boolean
   initialValue?: string
@@ -15,6 +17,7 @@ interface Props {
 
 export function SearchBar({
   size = 'md',
+  compact = false,
   placeholder = 'Search a job title…',
   autoFocus = false,
   initialValue = '',
@@ -124,6 +127,7 @@ export function SearchBar({
             className={cx(
               'input',
               big ? 'py-3.5 pl-11 pr-4 text-base' : 'py-2.5 pl-10 pr-3',
+              compact && 'bg-raised py-2 focus:bg-surface',
             )}
             onChange={(e) => {
               setQuery(e.target.value)
@@ -134,16 +138,20 @@ export function SearchBar({
           />
         </div>
 
-        <button
-          type="button"
-          onClick={submit}
-          className={cx('btn-primary shrink-0', big && 'px-5 py-3.5 text-base')}
-        >
-          {big ? 'Analyse Job Requirements' : 'Search'}
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14m-6-6 6 6-6 6" />
-          </svg>
-        </button>
+        {!compact && (
+          <button
+            type="button"
+            onClick={submit}
+            className={cx('btn-primary shrink-0', big && 'px-5 py-3.5 text-base')}
+          >
+            {/* Was "Analyse Job Requirements", which named a different feature
+                (the JD analyser) than the one this button actually runs. */}
+            {big ? 'Show me' : 'Search'}
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14m-6-6 6 6-6 6" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {showPanel && (
@@ -158,7 +166,7 @@ export function SearchBar({
 
           {!searching && !results.length && (
             <li className="px-3 py-2.5 text-sm text-muted">
-              No role matches “{query.trim()}”. We currently analyse 13 roles —{' '}
+              Nothing matches “{query.trim()}”.{' '}
               <button
                 type="button"
                 className="link"
@@ -167,7 +175,7 @@ export function SearchBar({
                   navigate('/search')
                 }}
               >
-                browse all
+                See every job we cover
               </button>
               .
             </li>
@@ -194,6 +202,21 @@ export function SearchBar({
               </button>
             </li>
           ))}
+
+          {!isStaticBuild && (
+            <li className="mt-1 border-t border-line pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false)
+                  navigate('/analyze')
+                }}
+                className="w-full rounded-lg px-3 py-2 text-left text-xs text-muted transition-colors hover:bg-raised hover:text-ink"
+              >
+                Got a specific job ad? Paste it instead →
+              </button>
+            </li>
+          )}
         </ul>
       )}
     </div>

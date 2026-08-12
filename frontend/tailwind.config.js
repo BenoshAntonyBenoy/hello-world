@@ -18,12 +18,19 @@ export default {
           soft: 'rgb(var(--brand-soft) / <alpha-value>)',
           ink: 'rgb(var(--brand-ink) / <alpha-value>)',
         },
+        // Foreground for anything sitting on a brand fill. White reads fine on
+        // the light-theme indigo but only reaches 3.4:1 on the lighter dark-theme
+        // one, so the pairing has to flip with the theme rather than being
+        // hardcoded per component.
+        'on-brand': 'rgb(var(--on-brand) / <alpha-value>)',
         high: 'rgb(var(--high) / <alpha-value>)',
         medium: 'rgb(var(--medium) / <alpha-value>)',
         low: 'rgb(var(--low) / <alpha-value>)',
       },
       fontFamily: {
         sans: [
+          // Shipped by @fontsource-variable/inter, imported in main.tsx.
+          'Inter Variable',
           'Inter',
           'ui-sans-serif',
           'system-ui',

@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
+import { usePageMeta } from '@/lib/hooks'
 import { Page } from '@/components/ui'
 
 export default function NotFound() {
+  usePageMeta('Page not found')
   return (
     <Page className="max-w-xl">
       <div className="py-16 text-center">

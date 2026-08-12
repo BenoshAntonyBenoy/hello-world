@@ -37,10 +37,16 @@ jobs:
 
       - name: Work out the base path
         id: base
-        # A project page is served from /<repo>/, a user or org page from /.
+        # A custom domain serves the site from the root, so frontend/public/CNAME
+        # is what decides this — Vite copies that file into dist/ and Pages reads
+        # it as the domain. Without one, a project page lives at /<repo>/ and a
+        # user or org page at /.
         run: |
           repo="${{ github.event.repository.name }}"
-          if [[ "$repo" == *.github.io ]]; then
+          if [[ -f frontend/public/CNAME ]]; then
+            echo "path=/" >> "$GITHUB_OUTPUT"
+            echo "Custom domain: $(cat frontend/public/CNAME)"
+          elif [[ "$repo" == *.github.io ]]; then
             echo "path=/" >> "$GITHUB_OUTPUT"
           else
             echo "path=/$repo/" >> "$GITHUB_OUTPUT"

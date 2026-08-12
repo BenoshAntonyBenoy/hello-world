@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { api, isStaticBuild } from '@/lib/api'
-import { useAsync } from '@/lib/hooks'
+import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count, dateLabel } from '@/lib/format'
 import { DistributionBars, Sparkline, DirectionChip } from '@/components/charts'
 import {
@@ -22,6 +22,14 @@ export default function RoleDashboard() {
   const { role = '' } = useParams()
   const analysis = useAsync(() => api.role(role), [role])
   const trends = useAsync(() => api.roleTrends(role), [role])
+
+  const title = analysis.data?.role.title
+  usePageMeta(
+    title ? `${title} — what employers ask for` : 'Role requirements',
+    title
+      ? `The requirements most often listed in analysed ${title} postings, with sample sizes and confidence.`
+      : undefined,
+  )
 
   if (analysis.loading) {
     return (

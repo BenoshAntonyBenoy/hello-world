@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '@/lib/api'
-import { useAsync } from '@/lib/hooks'
+import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count } from '@/lib/format'
 import {
   BarLegend,
@@ -32,6 +32,10 @@ export default function RoleSkills() {
     [role],
   )
   const summary = useAsync(() => api.role(role), [role])
+
+  usePageMeta(
+    summary.data ? `${summary.data.role.title} — every requirement` : 'Role requirements',
+  )
 
   const min = FILTERS.find((f) => f.key === filter)?.min ?? 0
   const groups = (data ?? [])

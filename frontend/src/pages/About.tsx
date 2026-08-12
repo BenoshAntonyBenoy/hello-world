@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { DOCS_LINK } from '@/components/Layout'
-import { useAsync } from '@/lib/hooks'
+import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count } from '@/lib/format'
 import { Caveat, Page, SectionHead, StatTile } from '@/components/ui'
 
 export default function About() {
+  usePageMeta(
+    'About & data sources',
+    'How a number gets made: where the postings come from, how requirements are extracted and counted, and what the figures do not mean.',
+  )
   const health = useAsync(() => api.health(), [])
   const sources = useAsync(() => api.sources(), [])
 

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, ApiError, isStaticBuild } from '@/lib/api'
 import type { AnalyzeResult } from '@/lib/types'
+import { usePageMeta } from '@/lib/hooks'
 import { experienceLabel } from '@/lib/format'
 import { Caveat, EmptyState, Page, SectionHead, StatTile, cx } from '@/components/ui'
 
@@ -34,6 +35,10 @@ const TYPE_TONE: Record<string, string> = {
 }
 
 export default function Analyze() {
+  usePageMeta(
+    'Analyse a job description',
+    'Paste a single job posting and see exactly which requirements it asks for, using the same extraction pipeline as the whole corpus.',
+  )
   const [text, setText] = useState('')
   const [title, setTitle] = useState('')
   const [result, setResult] = useState<AnalyzeResult | null>(null)

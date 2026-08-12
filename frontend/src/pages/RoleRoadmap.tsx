@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { api } from '@/lib/api'
-import { useAsync } from '@/lib/hooks'
+import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count } from '@/lib/format'
 import {
   Caveat,
@@ -27,6 +27,13 @@ export default function RoleRoadmap() {
   const { data, loading, error, notFound, reload } = useAsync(
     () => api.roleRoadmap(role, true),
     [role],
+  )
+
+  usePageMeta(
+    data ? `Learning path for ${data.role.title}` : 'Learning path',
+    data
+      ? `What to learn for ${data.role.title}, ordered by demand with prerequisites scheduled first.`
+      : undefined,
   )
 
   const known = data?.stages.flatMap((s) => s.items).filter((i) => i.already_known).length ?? 0

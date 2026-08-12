@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '@/lib/api'
-import { useAsync } from '@/lib/hooks'
+import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count } from '@/lib/format'
 import { ReadinessRing } from '@/components/charts'
 import type { GapItem } from '@/lib/types'
@@ -10,6 +10,7 @@ import {
   EmptyState,
   ErrorState,
   Page,
+  RoleTabs,
   SectionHead,
   Skeleton,
   cx,
@@ -62,6 +63,10 @@ function GapList({
 }
 
 export default function SkillGap() {
+  usePageMeta(
+    'Skill gap',
+    'Compare the skills on your profile against what postings for a role actually ask for, weighted by how often each appears.',
+  )
   const [params, setParams] = useSearchParams()
   const roles = useAsync(() => api.roles(), [])
   const profile = useAsync(() => api.profile(), [])
@@ -98,7 +103,7 @@ export default function SkillGap() {
         </div>
 
         <label className="shrink-0">
-          <span className="label mb-1.5 block">Compare against</span>
+          <span className="label mb-1.5 block">Ready for which job?</span>
           <select
             className="input min-w-[15rem] cursor-pointer"
             value={effectiveRole}
@@ -116,6 +121,12 @@ export default function SkillGap() {
           </select>
         </label>
       </div>
+
+      {effectiveRole && (
+        <div className="mt-6">
+          <RoleTabs slug={effectiveRole} active="gap" />
+        </div>
+      )}
 
       {!profile.loading && !hasSkills && (
         <div className="mt-8">

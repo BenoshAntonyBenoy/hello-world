@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Layout } from '@/components/Layout'
 import Landing from '@/pages/Landing'
 import Search from '@/pages/Search'
@@ -25,23 +26,29 @@ function ScrollToTop() {
 }
 
 export default function App() {
+  const { pathname } = useLocation()
+
   return (
     <Layout>
       <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/jobs/:role" element={<RoleDashboard />} />
-        <Route path="/jobs/:role/skills" element={<RoleSkills />} />
-        <Route path="/jobs/:role/roadmap" element={<RoleRoadmap />} />
-        <Route path="/jobs/:role/listings" element={<RoleJobs />} />
-        <Route path="/trends" element={<Trends />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/skill-gap" element={<SkillGap />} />
-        <Route path="/analyze" element={<Analyze />} />
-        <Route path="/about" element={<About />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      {/* Keyed on the path so navigating away from a route that threw clears
+          the error, rather than trapping the user on the fallback. */}
+      <ErrorBoundary resetKey={pathname}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/jobs/:role" element={<RoleDashboard />} />
+          <Route path="/jobs/:role/skills" element={<RoleSkills />} />
+          <Route path="/jobs/:role/roadmap" element={<RoleRoadmap />} />
+          <Route path="/jobs/:role/listings" element={<RoleJobs />} />
+          <Route path="/trends" element={<Trends />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/skill-gap" element={<SkillGap />} />
+          <Route path="/analyze" element={<Analyze />} />
+          <Route path="/about" element={<About />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ErrorBoundary>
     </Layout>
   )
 }

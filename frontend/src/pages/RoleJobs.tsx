@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '@/lib/api'
-import { useAsync } from '@/lib/hooks'
+import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count, relativeDate, salaryLabel } from '@/lib/format'
 import {
   Caveat,
@@ -22,6 +22,8 @@ export default function RoleJobs() {
     () => api.roleJobs(role, PAGE_SIZE, page * PAGE_SIZE),
     [role, page],
   )
+
+  usePageMeta(data ? `${data.role.title} — the postings behind the analysis` : 'Postings')
 
   const pages = data ? Math.ceil(data.total / PAGE_SIZE) : 0
 

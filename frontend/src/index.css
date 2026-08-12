@@ -3,40 +3,54 @@
 @tailwind utilities;
 
 @layer base {
+  /* Neutrals are warmed a few points off true grey so they read as chosen
+     alongside the orange rather than left over from a blue palette. Every
+     pairing below clears WCAG AA (4.5:1) for body text on --canvas. */
   :root {
-    --canvas: 250 250 251;
+    --canvas: 251 250 249;
     --surface: 255 255 255;
-    --raised: 246 247 249;
-    --line: 226 228 233;
-    --ink: 17 19 24;
-    --muted: 92 98 110;
-    --faint: 140 146 158;
+    --raised: 245 242 239;
+    --line: 231 226 220;
+    --ink: 26 23 20;
+    --muted: 92 85 77;
+    --faint: 111 103 94;      /* 5.3:1 */
 
-    --brand: 79 70 229;
-    --brand-soft: 238 238 253;
-    --brand-ink: 67 56 202;
+    /* A burnt orange rather than a bright one: at #F97316 white text lands at
+       2.8:1, so the obvious brand orange cannot carry a button. This one takes
+       white at 5.2:1 and still reads unmistakably orange. */
+    --brand: 194 65 12;
+    --brand-soft: 255 241 231;
+    --brand-ink: 154 52 18;   /* 7.0:1 — links and text on light grounds */
+    --on-brand: 255 255 255;
 
-    --high: 220 38 38;
-    --medium: 202 138 4;
-    --low: 22 143 91;
+    /* Priority colours have to stay legible *next to* the brand now that it is
+       orange. High is pushed to crimson and medium to a deep gold so neither
+       reads as a second accent. */
+    --high: 180 23 58;        /* 6.5:1 */
+    --medium: 122 90 5;       /* 6.1:1 */
+    --low: 17 115 76;         /* 5.6:1 */
   }
 
   .dark {
-    --canvas: 9 10 13;
-    --surface: 17 19 24;
-    --raised: 24 27 33;
-    --line: 39 43 51;
-    --ink: 240 241 244;
-    --muted: 154 160 172;
-    --faint: 112 118 130;
+    --canvas: 14 12 11;
+    --surface: 26 22 20;
+    --raised: 36 31 27;
+    --line: 51 44 38;
+    --ink: 243 239 235;
+    --muted: 173 164 155;
+    --faint: 142 133 124;     /* 5.4:1 */
 
-    --brand: 129 122 250;
-    --brand-soft: 32 31 63;
-    --brand-ink: 165 160 252;
+    /* The dark theme needs the light end of the orange to stay visible on a
+       near-black ground, which makes white unusable on it — hence --on-brand
+       flipping to ink. Dark text on this fill is 7.9:1. */
+    --brand: 251 146 60;
+    --brand-soft: 52 32 15;
+    --brand-ink: 253 186 140;
+    --on-brand: 26 23 20;
 
-    --high: 248 113 113;
-    --medium: 234 179 8;
-    --low: 52 191 128;
+    --high: 255 128 149;
+    --medium: 232 185 63;
+    --low: 70 196 138;
   }
 
   * {
@@ -80,7 +94,7 @@
   }
 
   .btn-primary {
-    @apply btn bg-brand text-white hover:bg-brand-ink;
+    @apply btn bg-brand text-on-brand hover:bg-brand-ink;
   }
 
   .btn-secondary {
@@ -107,7 +121,52 @@
   }
 
   .link {
-    @apply text-brand underline-offset-4 hover:underline;
+    @apply text-brand-ink underline-offset-4 hover:underline;
+  }
+
+  /* Hero photograph. The source is only 510px wide, so it is deliberately
+     treated as a soft backdrop: a scrim carries the text contrast and the
+     image supplies atmosphere, never detail. The URL is set inline from
+     BASE_URL — a bare `/hero-studying.jpg` here would break on a project page
+     served from /hello-world/. */
+  .hero-photo {
+    background-size: cover;
+    background-position: 50% 62%;
+  }
+}
+
+/* --- logo motion ---------------------------------------------------------- */
+
+.logo-figure {
+  transform-box: fill-box;
+  transform-origin: 50% 78%;
+  animation: logo-bob 3.6s ease-in-out infinite;
+}
+
+.logo:hover .logo-figure,
+.logo:focus-visible .logo-figure {
+  animation: logo-tip 0.55s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+@keyframes logo-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.8px);
+  }
+}
+
+@keyframes logo-tip {
+  0% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(-9deg);
+  }
+  100% {
+    transform: rotate(0deg);
   }
 }
 

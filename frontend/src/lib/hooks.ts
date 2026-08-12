@@ -76,6 +76,28 @@ export function useDebounced<T>(value: T, ms = 220): T {
   return debounced
 }
 
+const DEFAULT_TITLE = 'hello-world — Learn what the industry actually wants'
+const DEFAULT_DESCRIPTION =
+  'hello-world analyses job postings to show the skills employers actually ask for, ' +
+  'so you can prepare for the job rather than the syllabus.'
+
+/**
+ * Give a route its own title and description.
+ *
+ * A single-page app keeps whatever the server sent unless something updates it,
+ * so without this every one of the twelve routes shares one tab label, one
+ * history entry name and one preview snippet. Pass `null` for the landing page
+ * to get the unprefixed default.
+ */
+export function usePageMeta(title: string | null, description?: string) {
+  useEffect(() => {
+    document.title = title ? `${title} · hello-world` : DEFAULT_TITLE
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute('content', description ?? DEFAULT_DESCRIPTION)
+  }, [title, description])
+}
+
 const THEME_KEY = 'helloworld.theme'
 
 export function useTheme() {

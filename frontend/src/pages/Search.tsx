@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api, isStaticBuild } from '@/lib/api'
-import { useAsync } from '@/lib/hooks'
+import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count } from '@/lib/format'
 import { SearchBar } from '@/components/SearchBar'
 import { EmptyState, ErrorState, Page, Skeleton, cx } from '@/components/ui'
@@ -9,6 +9,10 @@ import { EmptyState, ErrorState, Page, Skeleton, cx } from '@/components/ui'
 export default function Search() {
   const [params] = useSearchParams()
   const query = params.get('q') ?? ''
+  usePageMeta(
+    query ? `Roles matching “${query}”` : 'Browse roles',
+    'Pick a role to see the requirements employers actually list, how they are shifting, and what to learn first.',
+  )
   const { data, loading, error, reload } = useAsync(() => api.roles(), [])
 
   const grouped = useMemo(() => {

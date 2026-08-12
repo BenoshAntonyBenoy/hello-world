@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
 import { api } from '@/lib/api'
-import { useAsync } from '@/lib/hooks'
+import { useAsync, usePageMeta } from '@/lib/hooks'
 import { DirectionChip, Sparkline, TrendChart } from '@/components/charts'
 import {
   Caveat,
@@ -8,6 +8,7 @@ import {
   ErrorState,
   LoadingBlock,
   Page,
+  RoleTabs,
   SectionHead,
   Skeleton,
 } from '@/components/ui'
@@ -38,10 +39,18 @@ function TrendRow({ trend }: { trend: Trend }) {
 
 export default function Trends() {
   const [params, setParams] = useSearchParams()
-  const roleSlug = params.get('role') ?? 'ai-ml-engineer'
-
   const roles = useAsync(() => api.roles(), [])
-  const trends = useAsync(() => api.roleTrends(roleSlug), [roleSlug])
+
+  // Was hard-coded to 'ai-ml-engineer', which broke the page for any corpus
+  // that does not happen to contain that role.
+  const roleSlug = params.get('role') ?? roles.data?.[0]?.slug ?? ''
+
+  const trends = useAsync(() => api.roleTrends(roleSlug), [roleSlug], Boolean(roleSlug))
+
+  usePageMeta(
+    trends.data ? `${trends.data.role.title} — how requirements are shifting` : 'Trends',
+    'Month-by-month share of postings mentioning each skill, with rising and falling requirements separated from sampling noise.',
+  )
 
   const highlight = [
     ...(trends.data?.emerging.slice(0, 3) ?? []),
@@ -63,7 +72,7 @@ export default function Trends() {
         </div>
 
         <label className="shrink-0">
-          <span className="label mb-1.5 block">Role</span>
+          <span className="label mb-1.5 block">Job</span>
           <select
             className="input min-w-[15rem] cursor-pointer"
             value={roleSlug}
@@ -77,6 +86,12 @@ export default function Trends() {
           </select>
         </label>
       </div>
+
+      {roleSlug && (
+        <div className="mt-6">
+          <RoleTabs slug={roleSlug} active="trends" />
+        </div>
+      )}
 
       {trends.loading && (
         <div className="mt-8 space-y-5">

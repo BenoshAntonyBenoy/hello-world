@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { clearProfileToken } from '@/lib/profile'
-import { useAsync, useDebounced } from '@/lib/hooks'
+import { useAsync, useDebounced, usePageMeta } from '@/lib/hooks'
 import type { Proficiency, Skill } from '@/lib/types'
 import {
   Caveat,
@@ -26,6 +26,10 @@ const LEVELS: { key: Proficiency; label: string; hint: string }[] = [
 ]
 
 export default function Profile() {
+  usePageMeta(
+    'Your skill profile',
+    'Pick the skills you already have and see what is worth learning next. No account, nothing shared.',
+  )
   const profile = useAsync(() => api.profile(), [])
   const roles = useAsync(() => api.roles(), [])
 

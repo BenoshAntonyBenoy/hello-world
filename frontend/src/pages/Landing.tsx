@@ -1,47 +1,48 @@
 import { Link } from 'react-router-dom'
 import { SearchBar } from '@/components/SearchBar'
 import { Page, Skeleton, cx } from '@/components/ui'
-import { api } from '@/lib/api'
-import { useAsync } from '@/lib/hooks'
+import { api, isStaticBuild } from '@/lib/api'
+import { useAsync, usePageMeta } from '@/lib/hooks'
 import { count } from '@/lib/format'
 
 const EXAMPLES = [
   'Software Engineer',
-  'Data Scientist',
+  'Data Analyst',
   'Cybersecurity Analyst',
-  'Embedded Systems Engineer',
   'UI/UX Designer',
-  'DevOps Engineer',
+  'Digital Marketing Specialist',
 ]
 
-const STEPS = [
+/** Three things a person can actually get here, named as outcomes. */
+const OUTCOMES = [
   {
-    n: '01',
-    title: 'Collect postings',
-    body: 'Job descriptions arrive through a connector layer — official APIs, licensed datasets, public boards, or ones you paste in yourself.',
+    title: 'See what employers ask for',
+    body: 'The skills that came up most often across real postings for that job — and how many asked for each.',
+    icon: (
+      <path d="M4 19V9m5 10V5m5 14v-7m5 7V8" strokeLinecap="round" />
+    ),
   },
   {
-    n: '02',
-    title: 'Extract requirements',
-    body: 'Each posting is parsed section by section, so a hard requirement is told apart from a nice-to-have, and “ReactJS” and “React.js” are counted as one thing.',
+    title: 'Get a plan for what to learn',
+    body: 'Those skills put in order, so you never start on something before the thing it depends on.',
+    icon: (
+      <path d="M5 6h14M5 12h9M5 18h5m5.5 1.5L18 22l4-5.5" strokeLinecap="round" strokeLinejoin="round" />
+    ),
   },
   {
-    n: '03',
-    title: 'Count what recurs',
-    body: 'Duplicate reposts and off-topic listings are removed first, then every skill gets a frequency and a confidence rating based on sample size.',
-  },
-  {
-    n: '04',
-    title: 'Turn it into a plan',
-    body: 'Demand data becomes an ordered learning path, with prerequisites scheduled before the skills that depend on them.',
+    title: 'Find out if you are ready',
+    body: 'Tick off what you already know and see how much of the job you cover, and what to close first.',
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="m8.5 12 2.5 2.5 4.5-5" strokeLinecap="round" strokeLinejoin="round" />
+      </>
+    ),
   },
 ]
-
-function slugify(title: string): string {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-}
 
 export default function Landing() {
+  usePageMeta(null)
   const { data: health } = useAsync(() => api.health(), [])
   const { data: roles } = useAsync(() => api.roles(), [])
 
@@ -49,43 +50,63 @@ export default function Landing() {
 
   return (
     <>
-      {/* Hero ---------------------------------------------------------- */}
-      <section className="relative overflow-hidden border-b border-line">
+      {/* Hero ----------------------------------------------------------- */}
+      <section className="relative isolate overflow-hidden border-b border-line">
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-25"
+          className="hero-photo absolute inset-0 -z-20"
+          style={{ backgroundImage: `url(${import.meta.env.BASE_URL}hero-studying.jpg)` }}
+          aria-hidden
+        />
+        {/* The scrim, not the photograph, is what makes the headline legible —
+            the image only has to survive behind it. Even over the darkest part
+            of the photo this keeps body text above 9:1 in both themes. */}
+        <div
+          className="absolute inset-0 -z-10 bg-canvas/[0.76] dark:bg-canvas/[0.86]"
+          aria-hidden
+        />
+        {/* Fades the photograph out into the page rather than ending it on a line. */}
+        <div
+          className="absolute inset-x-0 bottom-0 -z-10 h-28 bg-gradient-to-b from-transparent to-canvas"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-0 -z-10"
           style={{
             backgroundImage:
-              'radial-gradient(60rem 32rem at 50% -12rem, rgb(var(--brand) / 0.16), transparent 70%)',
+              'radial-gradient(55rem 30rem at 50% -8rem, rgb(var(--brand) / 0.20), transparent 72%)',
           }}
           aria-hidden
         />
-        <Page className="relative lg:py-20">
+
+        <Page className="relative lg:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="chip mx-auto mb-6 w-fit">
+            <span className="chip mx-auto mb-6 w-fit border-brand/30 bg-brand-soft text-brand-ink">
               <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-              Job requirements intelligence
+              Built from real job postings
             </span>
 
-            <h1 className="animate-fade-up text-balance text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">
-              Know what industry wants.
+            <h1 className="animate-fade-up text-balance text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.75rem]">
+              What job do you want?
             </h1>
 
-            <p className="mx-auto mt-5 max-w-2xl text-balance text-base leading-relaxed text-muted sm:text-lg">
-              hello-world helps you discover the skills employers actually ask for — so you
-              can prepare for the job, not just the syllabus.
+            <p className="mx-auto mt-5 max-w-xl text-balance text-base leading-relaxed text-muted sm:text-lg">
+              Type it below. We will show you the skills employers actually ask for, in what
+              order to learn them, and how far along you already are.
             </p>
 
             <div className="mx-auto mt-8 max-w-2xl">
-              <SearchBar size="lg" placeholder="Search a job title…" />
+              <SearchBar size="lg" autoFocus placeholder="e.g. Data Analyst" />
             </div>
 
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-              <span className="text-xs text-faint">Try:</span>
+              <span className="text-xs text-faint">Popular:</span>
               {EXAMPLES.map((example) => (
                 <Link
                   key={example}
-                  to={`/jobs/${slugify(example)}`}
-                  className="chip transition-colors hover:border-brand/40 hover:bg-brand-soft hover:text-brand-ink"
+                  to={`/jobs/${example.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+                  // These chips are a primary way in, so they get a real tap
+                  // target rather than the 26px the default chip padding gives.
+                  className="chip bg-surface/80 px-3.5 py-2 text-xs transition-colors hover:border-brand/40 hover:bg-brand-soft hover:text-brand-ink"
                 >
                   {example}
                 </Link>
@@ -94,61 +115,42 @@ export default function Landing() {
 
             {health && (
               <p className="tnum mt-8 text-xs text-faint">
-                {count(health.analyzed_jobs)} postings analysed across {health.roles} roles ·{' '}
-                {health.skills} requirements in the vocabulary
+                {count(health.analyzed_jobs)} postings read · {health.roles} jobs covered ·{' '}
+                {health.skills} skills tracked
               </p>
             )}
           </div>
         </Page>
       </section>
 
-      {/* The problem ---------------------------------------------------- */}
+      {/* What you get ---------------------------------------------------- */}
       <Page>
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-14">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">
-              The syllabus moves slower than the market.
-            </h2>
-            <p className="mt-4 text-sm leading-relaxed text-muted">
-              A student who wants to become a Data Analyst has no reliable way to find out
-              what a Data Analyst actually needed to learn. What they get instead is a
-              syllabus written years ago, job descriptions listing fifteen tools without
-              saying which three mattered, and roadmaps optimised for watch time.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-muted">
-              The information exists — it is sitting in the postings themselves. It just
-              never reaches the person who needs it.
-            </p>
-            <Link to="/about" className="link mt-4 inline-block text-sm">
-              How we read the data →
-            </Link>
-          </div>
-
-          <div className="card divide-y divide-line">
-            {STEPS.map((step) => (
-              <div key={step.n} className="flex gap-4 p-5">
-                <span className="tnum font-mono text-xs font-semibold text-brand">{step.n}</span>
-                <div>
-                  <p className="text-sm font-medium">{step.title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-muted">{step.body}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {OUTCOMES.map((item) => (
+            <div key={item.title} className="card p-5">
+              <span className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-brand-soft text-brand-ink">
+                <svg viewBox="0 0 24 24" className="h-[1.15rem] w-[1.15rem]" fill="none" stroke="currentColor" strokeWidth="1.9">
+                  {item.icon}
+                </svg>
+              </span>
+              <p className="font-medium">{item.title}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{item.body}</p>
+            </div>
+          ))}
         </div>
       </Page>
 
-      {/* Roles ---------------------------------------------------------- */}
+      {/* Jobs ------------------------------------------------------------ */}
       <Page className="pt-0">
-        <div className="mb-4 flex items-end justify-between gap-3">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight">Roles we analyse</h2>
+            <h2 className="text-xl font-semibold tracking-tight">Or pick a job to start from</h2>
             <p className="mt-1 text-sm text-muted">
-              Every role below has a full requirement breakdown, trend history and learning path.
+              Every one below has a full breakdown, a learning plan and the postings behind it.
             </p>
           </div>
           <Link to="/search" className="btn-secondary shrink-0">
-            Browse all
+            See all {health?.roles ?? ''} jobs
           </Link>
         </div>
 
@@ -167,7 +169,7 @@ export default function Landing() {
               to={`/jobs/${role.slug}`}
               className={cx(
                 'card group p-4 transition-all duration-150',
-                'hover:-translate-y-0.5 hover:border-brand/35 hover:shadow-lift',
+                'hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-lift',
               )}
               style={{ animationDelay: `${i * 25}ms` }}
             >
@@ -186,10 +188,48 @@ export default function Landing() {
                 </svg>
               </div>
               <p className="tnum mt-1 text-xs text-muted">
-                {count(role.analyzed_jobs)} postings analysed · {role.category}
+                {count(role.analyzed_jobs)} postings read · {role.category}
               </p>
             </Link>
           ))}
+        </div>
+      </Page>
+
+      {/* Job ad + honesty ------------------------------------------------ */}
+      <Page className="pt-0">
+        <div className="grid gap-4 lg:grid-cols-2">
+          {!isStaticBuild && (
+            <div className="card flex flex-col justify-between gap-4 p-6">
+              <div>
+                <h2 className="text-lg font-semibold tracking-tight">
+                  Already have a job ad in front of you?
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  Paste it in and we will pull out exactly what it is asking for, then show you how
+                  that compares with everything else on the market.
+                </p>
+              </div>
+              <Link to="/analyze" className="btn-primary w-fit">
+                Paste a job ad
+              </Link>
+            </div>
+          )}
+
+          <div className="card flex flex-col justify-between gap-4 p-6">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight">
+                Where these numbers come from
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                We read job postings and count what recurs. Every figure carries the number of
+                postings behind it, so you can tell a strong signal from a small sample — and we
+                say plainly what the numbers cannot tell you.
+              </p>
+            </div>
+            <Link to="/about" className="btn-secondary w-fit">
+              How this works
+            </Link>
+          </div>
         </div>
       </Page>
     </>
